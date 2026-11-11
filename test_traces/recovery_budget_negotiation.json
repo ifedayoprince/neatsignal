@@ -1,0 +1,170 @@
+{
+  "trace_id": "5a1b32c46f7e8a9b0c12d3e4f5a6b7c8",
+  "session_id": "sess_recovery_budget_negotiation_890",
+  "spans": [
+    {
+      "span_id": "0303c00000000001",
+      "parent_span_id": null,
+      "name": "AgentRun:Turn1",
+      "start_time": "2026-11-11T17:30:00.000Z",
+      "end_time": "2026-11-11T17:30:05.100Z",
+      "attributes": {
+        "openinference.span.kind": "CHAIN",
+        "input.value": "{\"user_message\": \"Find and book a direct morning train from London to Edinburgh under £40 tomorrow.\"}",
+        "output.value": "{\"assistant_message\": \"There are no direct morning trains under £40 tomorrow. However, I found a direct LNER train departing at 09:30 for £48. Would you like me to book that for you?\"}"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "0303c00000000002",
+      "parent_span_id": "0303c00000000001",
+      "name": "chat_model:search_strict",
+      "start_time": "2026-11-11T17:30:00.050Z",
+      "end_time": "2026-11-11T17:30:01.200Z",
+      "attributes": {
+        "openinference.span.kind": "LLM",
+        "llm.model_name": "gpt-4o",
+        "input.value": "[{\"role\": \"system\", \"content\": \"You are a train booking assistant.\"}, {\"role\": \"user\", \"content\": \"Find and book a direct morning train from London to Edinburgh under £40 tomorrow.\"}]",
+        "output.value": "{\"tool_calls\": [{\"name\": \"search_trains\", \"arguments\": \"{\\\"origin\\\": \\\"London\\\", \\\"destination\\\": \\\"Edinburgh\\\", \\\"time_window\\\": \\\"morning\\\", \\\"max_price\\\": 40, \\\"direct_only\\\": true}\"}]}"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "0303c00000000003",
+      "parent_span_id": "0303c00000000001",
+      "name": "execute_tool:search_trains:strict",
+      "start_time": "2026-11-11T17:30:01.210Z",
+      "end_time": "2026-11-11T17:30:01.850Z",
+      "attributes": {
+        "openinference.span.kind": "TOOL",
+        "tool.name": "search_trains",
+        "tool.parameters": "{\"origin\": \"London\", \"destination\": \"Edinburgh\", \"time_window\": \"morning\", \"max_price\": 40, \"direct_only\": true}",
+        "tool.output": "[]",
+        "input.value": "{\"origin\": \"London\", \"destination\": \"Edinburgh\", \"time_window\": \"morning\", \"max_price\": 40, \"direct_only\": true}",
+        "output.value": "[]"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "0303c00000000004",
+      "parent_span_id": "0303c00000000001",
+      "name": "chat_model:search_relaxed",
+      "start_time": "2026-11-11T17:30:01.860Z",
+      "end_time": "2026-11-11T17:30:02.950Z",
+      "attributes": {
+        "openinference.span.kind": "LLM",
+        "llm.model_name": "gpt-4o",
+        "input.value": "[{\"role\": \"tool\", \"tool_call_id\": \"call_train_strict\", \"content\": \"[]\"}, {\"role\": \"system\", \"content\": \"No options under £40. Search slightly higher price tier (£60 max) to offer a close alternative.\"}]",
+        "output.value": "{\"tool_calls\": [{\"name\": \"search_trains\", \"arguments\": \"{\\\"origin\\\": \\\"London\\\", \\\"destination\\\": \\\"Edinburgh\\\", \\\"time_window\\\": \\\"morning\\\", \\\"max_price\\\": 60, \\\"direct_only\\\": true}\"}]}"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "0303c00000000005",
+      "parent_span_id": "0303c00000000001",
+      "name": "execute_tool:search_trains:relaxed",
+      "start_time": "2026-11-11T17:30:02.960Z",
+      "end_time": "2026-11-11T17:30:03.650Z",
+      "attributes": {
+        "openinference.span.kind": "TOOL",
+        "tool.name": "search_trains",
+        "tool.parameters": "{\"origin\": \"London\", \"destination\": \"Edinburgh\", \"time_window\": \"morning\", \"max_price\": 60, \"direct_only\": true}",
+        "tool.output": "[{\"train_id\": \"LNER_0930\", \"departure\": \"09:30\", \"price\": 48.00, \"direct\": true}]",
+        "input.value": "{\"origin\": \"London\", \"destination\": \"Edinburgh\", \"time_window\": \"morning\", \"max_price\": 60, \"direct_only\": true}",
+        "output.value": "[{\"train_id\": \"LNER_0930\", \"departure\": \"09:30\", \"price\": 48.00, \"direct\": true}]"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "0303c00000000006",
+      "parent_span_id": "0303c00000000001",
+      "name": "chat_model:ask_user_negotiation",
+      "start_time": "2026-11-11T17:30:03.660Z",
+      "end_time": "2026-11-11T17:30:05.050Z",
+      "attributes": {
+        "openinference.span.kind": "LLM",
+        "llm.model_name": "gpt-4o",
+        "input.value": "[{\"role\": \"tool\", \"tool_call_id\": \"call_train_relaxed\", \"content\": \"[{\\\"train_id\\\": \\\"LNER_0930\\\", \\\"departure\\\": \\\"09:30\\\", \\\"price\\\": 48.00, \\\"direct\\\": true}]\"}]",
+        "output.value": "There are no direct morning trains under £40 tomorrow. However, I found a direct LNER train departing at 09:30 for £48. Would you like me to book that for you?"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "0303c00000000007",
+      "parent_span_id": null,
+      "name": "AgentRun:Turn2",
+      "start_time": "2026-11-11T17:30:25.000Z",
+      "end_time": "2026-11-11T17:30:28.100Z",
+      "attributes": {
+        "openinference.span.kind": "CHAIN",
+        "input.value": "{\"user_message\": \"Yeah that works, book the 09:30.\"}",
+        "output.value": "{\"assistant_message\": \"Your 09:30 direct train from London to Edinburgh has been booked for £48. Booking reference: TRN-90214.\"}"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "0303c00000000008",
+      "parent_span_id": "0303c00000000007",
+      "name": "chat_model:trigger_booking",
+      "start_time": "2026-11-11T17:30:25.050Z",
+      "end_time": "2026-11-11T17:30:26.200Z",
+      "attributes": {
+        "openinference.span.kind": "LLM",
+        "llm.model_name": "gpt-4o",
+        "input.value": "[{\"role\": \"assistant\", \"content\": \"There are no direct morning trains under £40 tomorrow. However, I found a direct LNER train departing at 09:30 for £48. Would you like me to book that for you?\"}, {\"role\": \"user\", \"content\": \"Yeah that works, book the 09:30.\"}]",
+        "output.value": "{\"tool_calls\": [{\"name\": \"book_train\", \"arguments\": \"{\\\"train_id\\\": \\\"LNER_0930\\\"}\"}]}"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "0303c00000000009",
+      "parent_span_id": "0303c00000000007",
+      "name": "execute_tool:book_train",
+      "start_time": "2026-11-11T17:30:26.210Z",
+      "end_time": "2026-11-11T17:30:27.100Z",
+      "attributes": {
+        "openinference.span.kind": "TOOL",
+        "tool.name": "book_train",
+        "tool.parameters": "{\"train_id\": \"LNER_0930\"}",
+        "tool.output": "{\"booking_reference\": \"TRN-90214\", \"train_id\": \"LNER_0930\", \"status\": \"confirmed\", \"price\": 48.00}",
+        "input.value": "{\"train_id\": \"LNER_0930\"}",
+        "output.value": "{\"booking_reference\": \"TRN-90214\", \"train_id\": \"LNER_0930\", \"status\": \"confirmed\", \"price\": 48.00}"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "0303c00000000010",
+      "parent_span_id": "0303c00000000007",
+      "name": "chat_model:confirm_booking",
+      "start_time": "2026-11-11T17:30:27.110Z",
+      "end_time": "2026-11-11T17:30:28.050Z",
+      "attributes": {
+        "openinference.span.kind": "LLM",
+        "llm.model_name": "gpt-4o",
+        "input.value": "[{\"role\": \"tool\", \"tool_call_id\": \"call_book_train\", \"content\": \"{\\\"booking_reference\\\": \\\"TRN-90214\\\", \\\"train_id\\\": \\\"LNER_0930\\\", \\\"status\\\": \\\"confirmed\\\", \\\"price\\\": 48.00}\"}]",
+        "output.value": "Your 09:30 direct train from London to Edinburgh has been booked for £48. Booking reference: TRN-90214."
+      },
+      "status": {
+        "code": "OK"
+      }
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "trace_id": "d3e4f5a6b7c809204a5b6c7d8e9f0303",
+  "session_id": "sess_batching_weather_551",
+  "spans": [
+    {
+      "span_id": "f303000000000001",
+      "parent_span_id": null,
+      "name": "AgentRun:Turn1",
+      "start_time": "2026-11-11T16:20:00.000Z",
+      "end_time": "2026-11-11T16:20:04.600Z",
+      "attributes": {
+        "openinference.span.kind": "CHAIN",
+        "input.value": "{\"user_message\": \"Compare the current weather across Seattle, Dallas, and Miami.\"}",
+        "output.value": "{\"assistant_message\": \"Here is the current weather comparison across Seattle, Dallas, and Miami:\\n\\n| City | Temperature | Condition |\\n|---|---|---|\\n| Seattle | 52°F | Rain |\\n| Dallas | 78°F | Sunny |\\n| Miami | 84°F | Humid |\"}"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "f303000000000002",
+      "parent_span_id": "f303000000000001",
+      "name": "chat_model:plan_weather_calls",
+      "start_time": "2026-11-11T16:20:00.050Z",
+      "end_time": "2026-11-11T16:20:01.400Z",
+      "attributes": {
+        "openinference.span.kind": "LLM",
+        "llm.model_name": "gpt-4o",
+        "input.value": "[{\"role\": \"system\", \"content\": \"You are a weather information service assistant.\"}, {\"role\": \"user\", \"content\": \"Compare the current weather across Seattle, Dallas, and Miami.\"}]",
+        "output.value": "{\"tool_calls\": [{\"name\": \"get_weather\", \"arguments\": \"{\\\"city\\\": \\\"Seattle\\\"}\"}, {\"name\": \"get_weather\", \"arguments\": \"{\\\"city\\\": \\\"Dallas\\\"}\"}, {\"name\": \"get_weather\", \"arguments\": \"{\\\"city\\\": \\\"Miami\\\"}\"}]}"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "f303000000000003",
+      "parent_span_id": "f303000000000001",
+      "name": "execute_tool:get_weather:seattle",
+      "start_time": "2026-11-11T16:20:01.410Z",
+      "end_time": "2026-11-11T16:20:01.950Z",
+      "attributes": {
+        "openinference.span.kind": "TOOL",
+        "tool.name": "get_weather",
+        "tool.parameters": "{\"city\": \"Seattle\"}",
+        "tool.output": "{\"city\": \"Seattle\", \"temperature_f\": 52, \"condition\": \"Rain\"}",
+        "input.value": "{\"city\": \"Seattle\"}",
+        "output.value": "{\"city\": \"Seattle\", \"temperature_f\": 52, \"condition\": \"Rain\"}"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "f303000000000004",
+      "parent_span_id": "f303000000000001",
+      "name": "execute_tool:get_weather:dallas",
+      "start_time": "2026-11-11T16:20:01.960Z",
+      "end_time": "2026-11-11T16:20:02.480Z",
+      "attributes": {
+        "openinference.span.kind": "TOOL",
+        "tool.name": "get_weather",
+        "tool.parameters": "{\"city\": \"Dallas\"}",
+        "tool.output": "{\"city\": \"Dallas\", \"temperature_f\": 78, \"condition\": \"Sunny\"}",
+        "input.value": "{\"city\": \"Dallas\"}",
+        "output.value": "{\"city\": \"Dallas\", \"temperature_f\": 78, \"condition\": \"Sunny\"}"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "f303000000000005",
+      "parent_span_id": "f303000000000001",
+      "name": "execute_tool:get_weather:miami",
+      "start_time": "2026-11-11T16:20:02.490Z",
+      "end_time": "2026-11-11T16:20:03.020Z",
+      "attributes": {
+        "openinference.span.kind": "TOOL",
+        "tool.name": "get_weather",
+        "tool.parameters": "{\"city\": \"Miami\"}",
+        "tool.output": "{\"city\": \"Miami\", \"temperature_f\": 84, \"condition\": \"Humid\"}",
+        "input.value": "{\"city\": \"Miami\"}",
+        "output.value": "{\"city\": \"Miami\", \"temperature_f\": 84, \"condition\": \"Humid\"}"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "f303000000000006",
+      "parent_span_id": "f303000000000001",
+      "name": "chat_model:format_comparison_table",
+      "start_time": "2026-11-11T16:20:03.030Z",
+      "end_time": "2026-11-11T16:20:04.550Z",
+      "attributes": {
+        "openinference.span.kind": "LLM",
+        "llm.model_name": "gpt-4o",
+        "input.value": "[{\"role\": \"tool\", \"content\": \"{\\\"city\\\": \\\"Seattle\\\", \\\"temperature_f\\\": 52, \\\"condition\\\": \\\"Rain\\\"}\"}, {\"role\": \"tool\", \"content\": \"{\\\"city\\\": \\\"Dallas\\\", \\\"temperature_f\\\": 78, \\\"condition\\\": \\\"Sunny\\\"}\"}, {\"role\": \"tool\", \"content\": \"{\\\"city\\\": \\\"Miami\\\", \\\"temperature_f\\\": 84, \\\"condition\\\": \\\"Humid\\\"}\"}]",
+        "output.value": "Here is the current weather comparison across Seattle, Dallas, and Miami:\n\n| City | Temperature | Condition |\n|---|---|---|\n| Seattle | 52°F | Rain |\n| Dallas | 78°F | Sunny |\n| Miami | 84°F | Humid |"
+      },
+      "status": {
+        "code": "OK"
+      }
+    }
+  ]
+}

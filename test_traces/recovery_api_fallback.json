@@ -1,0 +1,171 @@
+{
+  "trace_id": "3e9b10a24f5c6e7d8a90b1c2d3e4f5a6",
+  "session_id": "sess_recovery_api_fallback_710",
+  "spans": [
+    {
+      "span_id": "0101a00000000001",
+      "parent_span_id": null,
+      "name": "AgentRun:Turn1",
+      "start_time": "2026-11-11T17:00:00.000Z",
+      "end_time": "2026-11-11T17:00:04.900Z",
+      "attributes": {
+        "openinference.span.kind": "CHAIN",
+        "input.value": "{\"user_message\": \"Book a seat on flight BA178 for tomorrow.\"}",
+        "output.value": "{\"assistant_message\": \"Our automated seat assignment service timed out while booking flight BA178. However, I checked manual seat availability and found seats 14A, 14B, and 18C open. Would you like me to book seat 14A for you?\"}"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "0101a00000000002",
+      "parent_span_id": "0101a00000000001",
+      "name": "chat_model:initial_booking_attempt",
+      "start_time": "2026-11-11T17:00:00.050Z",
+      "end_time": "2026-11-11T17:00:01.200Z",
+      "attributes": {
+        "openinference.span.kind": "LLM",
+        "llm.model_name": "gpt-4o",
+        "input.value": "[{\"role\": \"system\", \"content\": \"You are an airline booking assistant.\"}, {\"role\": \"user\", \"content\": \"Book a seat on flight BA178 for tomorrow.\"}]",
+        "output.value": "{\"tool_calls\": [{\"name\": \"book_flight\", \"arguments\": \"{\\\"flight_id\\\": \\\"BA178\\\", \\\"auto_seat\\\": true}\"}]}"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "0101a00000000003",
+      "parent_span_id": "0101a00000000001",
+      "name": "execute_tool:book_flight",
+      "start_time": "2026-11-11T17:00:01.210Z",
+      "end_time": "2026-11-11T17:00:02.450Z",
+      "attributes": {
+        "openinference.span.kind": "TOOL",
+        "tool.name": "book_flight",
+        "tool.parameters": "{\"flight_id\": \"BA178\", \"auto_seat\": true}",
+        "tool.output": "{\"error\": \"500 SeatMapServiceTimeout\", \"message\": \"Failed to allocate seat automatically.\"}",
+        "input.value": "{\"flight_id\": \"BA178\", \"auto_seat\": true}",
+        "output.value": "{\"error\": \"500 SeatMapServiceTimeout\", \"message\": \"Failed to allocate seat automatically.\"}"
+      },
+      "status": {
+        "code": "ERROR",
+        "description": "500 SeatMapServiceTimeout"
+      }
+    },
+    {
+      "span_id": "0101a00000000004",
+      "parent_span_id": "0101a00000000001",
+      "name": "chat_model:handle_error_and_fallback",
+      "start_time": "2026-11-11T17:00:02.460Z",
+      "end_time": "2026-11-11T17:00:03.400Z",
+      "attributes": {
+        "openinference.span.kind": "LLM",
+        "llm.model_name": "gpt-4o",
+        "input.value": "[{\"role\": \"tool\", \"tool_call_id\": \"call_book_auto\", \"content\": \"{\\\"error\\\": \\\"500 SeatMapServiceTimeout\\\"}\"}, {\"role\": \"system\", \"content\": \"Auto-booking failed due to seat map timeout. Check manual seat availability as fallback.\"}]",
+        "output.value": "{\"tool_calls\": [{\"name\": \"search_seat_availability\", \"arguments\": \"{\\\"flight_id\\\": \\\"BA178\\\"}\"}]}"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "0101a00000000005",
+      "parent_span_id": "0101a00000000001",
+      "name": "execute_tool:search_seat_availability",
+      "start_time": "2026-11-11T17:00:03.410Z",
+      "end_time": "2026-11-11T17:00:03.950Z",
+      "attributes": {
+        "openinference.span.kind": "TOOL",
+        "tool.name": "search_seat_availability",
+        "tool.parameters": "{\"flight_id\": \"BA178\"}",
+        "tool.output": "[\"14A\", \"14B\", \"18C\"]",
+        "input.value": "{\"flight_id\": \"BA178\"}",
+        "output.value": "[\"14A\", \"14B\", \"18C\"]"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "0101a00000000006",
+      "parent_span_id": "0101a00000000001",
+      "name": "chat_model:propose_seat",
+      "start_time": "2026-11-11T17:00:03.960Z",
+      "end_time": "2026-11-11T17:00:04.850Z",
+      "attributes": {
+        "openinference.span.kind": "LLM",
+        "llm.model_name": "gpt-4o",
+        "input.value": "[{\"role\": \"tool\", \"tool_call_id\": \"call_seat_search\", \"content\": \"[\\\"14A\\\", \\\"14B\\\", \\\"18C\\\"]\"}]",
+        "output.value": "Our automated seat assignment service timed out while booking flight BA178. However, I checked manual seat availability and found seats 14A, 14B, and 18C open. Would you like me to book seat 14A for you?"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "0101a00000000007",
+      "parent_span_id": null,
+      "name": "AgentRun:Turn2",
+      "start_time": "2026-11-11T17:00:20.000Z",
+      "end_time": "2026-11-11T17:00:22.800Z",
+      "attributes": {
+        "openinference.span.kind": "CHAIN",
+        "input.value": "{\"user_message\": \"Yes, book 14A please.\"}",
+        "output.value": "{\"assistant_message\": \"Great! Seat 14A on flight BA178 has been successfully confirmed. Your booking reference is BA771K.\"}"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "0101a00000000008",
+      "parent_span_id": "0101a00000000007",
+      "name": "chat_model:confirm_seat_decision",
+      "start_time": "2026-11-11T17:00:20.050Z",
+      "end_time": "2026-11-11T17:00:21.150Z",
+      "attributes": {
+        "openinference.span.kind": "LLM",
+        "llm.model_name": "gpt-4o",
+        "input.value": "[{\"role\": \"assistant\", \"content\": \"Would you like me to book seat 14A for you?\"}, {\"role\": \"user\", \"content\": \"Yes, book 14A please.\"}]",
+        "output.value": "{\"tool_calls\": [{\"name\": \"confirm_booking\", \"arguments\": \"{\\\"flight_id\\\": \\\"BA178\\\", \\\"seat\\\": \\\"14A\\\"}\"}]}"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "0101a00000000009",
+      "parent_span_id": "0101a00000000007",
+      "name": "execute_tool:confirm_booking",
+      "start_time": "2026-11-11T17:00:21.160Z",
+      "end_time": "2026-11-11T17:00:21.900Z",
+      "attributes": {
+        "openinference.span.kind": "TOOL",
+        "tool.name": "confirm_booking",
+        "tool.parameters": "{\"flight_id\": \"BA178\", \"seat\": \"14A\"}",
+        "tool.output": "{\"status\": \"confirmed\", \"booking_ref\": \"BA771K\", \"seat\": \"14A\", \"code\": 200}",
+        "input.value": "{\"flight_id\": \"BA178\", \"seat\": \"14A\"}",
+        "output.value": "{\"status\": \"confirmed\", \"booking_ref\": \"BA771K\", \"seat\": \"14A\", \"code\": 200}"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "0101a00000000010",
+      "parent_span_id": "0101a00000000007",
+      "name": "chat_model:final_confirmation",
+      "start_time": "2026-11-11T17:00:21.910Z",
+      "end_time": "2026-11-11T17:00:22.750Z",
+      "attributes": {
+        "openinference.span.kind": "LLM",
+        "llm.model_name": "gpt-4o",
+        "input.value": "[{\"role\": \"tool\", \"tool_call_id\": \"call_confirm_14A\", \"content\": \"{\\\"status\\\": \\\"confirmed\\\", \\\"booking_ref\\\": \\\"BA771K\\\", \\\"seat\\\": \\\"14A\\\", \\\"code\\\": 200}\"}]",
+        "output.value": "Great! Seat 14A on flight BA178 has been successfully confirmed. Your booking reference is BA771K."
+      },
+      "status": {
+        "code": "OK"
+      }
+    }
+  ]
+}

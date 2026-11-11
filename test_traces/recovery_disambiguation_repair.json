@@ -1,0 +1,235 @@
+{
+  "trace_id": "4f0a21b35e6d7f8a9b01c2d3e4f5a6b7",
+  "session_id": "sess_recovery_disambiguation_441",
+  "spans": [
+    {
+      "span_id": "0202b00000000001",
+      "parent_span_id": null,
+      "name": "AgentRun:Turn1",
+      "start_time": "2026-11-11T17:15:00.000Z",
+      "end_time": "2026-11-11T17:15:04.200Z",
+      "attributes": {
+        "openinference.span.kind": "CHAIN",
+        "input.value": "{\"user_message\": \"Send the report to Marcus.\"}",
+        "output.value": "{\"assistant_message\": \"I have emailed Q1_General_Report.pdf to Marcus.\"}"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "0202b00000000002",
+      "parent_span_id": "0202b00000000001",
+      "name": "chat_model:search_docs",
+      "start_time": "2026-11-11T17:15:00.050Z",
+      "end_time": "2026-11-11T17:15:01.050Z",
+      "attributes": {
+        "openinference.span.kind": "LLM",
+        "llm.model_name": "gpt-4o",
+        "input.value": "[{\"role\": \"system\", \"content\": \"You are an administrative workplace assistant.\"}, {\"role\": \"user\", \"content\": \"Send the report to Marcus.\"}]",
+        "output.value": "{\"tool_calls\": [{\"name\": \"search_files\", \"arguments\": \"{\\\"query\\\": \\\"report\\\"}\"}]}"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "0202b00000000003",
+      "parent_span_id": "0202b00000000001",
+      "name": "execute_tool:search_files",
+      "start_time": "2026-11-11T17:15:01.060Z",
+      "end_time": "2026-11-11T17:15:01.800Z",
+      "attributes": {
+        "openinference.span.kind": "TOOL",
+        "tool.name": "search_files",
+        "tool.parameters": "{\"query\": \"report\"}",
+        "tool.output": "{\"total_count\": 40, \"files\": [\"Q1_General_Report.pdf\", \"Q2_General_Report.pdf\", \"Annual_Financial_Report.pdf\", \"staging_outage_nov10.pdf\"]}",
+        "input.value": "{\"query\": \"report\"}",
+        "output.value": "{\"total_count\": 40, \"files\": [\"Q1_General_Report.pdf\", \"Q2_General_Report.pdf\", \"Annual_Financial_Report.pdf\", \"staging_outage_nov10.pdf\"]}"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "0202b00000000004",
+      "parent_span_id": "0202b00000000001",
+      "name": "chat_model:email_report",
+      "start_time": "2026-11-11T17:15:01.810Z",
+      "end_time": "2026-11-11T17:15:02.850Z",
+      "attributes": {
+        "openinference.span.kind": "LLM",
+        "llm.model_name": "gpt-4o",
+        "input.value": "[{\"role\": \"tool\", \"tool_call_id\": \"call_search_files\", \"content\": \"{\\\"total_count\\\": 40, \\\"files\\\": [\\\"Q1_General_Report.pdf\\\", ...]}\"}]",
+        "output.value": "{\"tool_calls\": [{\"name\": \"send_email\", \"arguments\": \"{\\\"recipient\\\": \\\"marcus@company.internal\\\", \\\"attachment\\\": \\\"Q1_General_Report.pdf\\\"}\"}]}"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "0202b00000000005",
+      "parent_span_id": "0202b00000000001",
+      "name": "execute_tool:send_email",
+      "start_time": "2026-11-11T17:15:02.860Z",
+      "end_time": "2026-11-11T17:15:03.450Z",
+      "attributes": {
+        "openinference.span.kind": "TOOL",
+        "tool.name": "send_email",
+        "tool.parameters": "{\"recipient\": \"marcus@company.internal\", \"attachment\": \"Q1_General_Report.pdf\"}",
+        "tool.output": "{\"status\": \"sent\", \"message_id\": \"msg_9921\"}",
+        "input.value": "{\"recipient\": \"marcus@company.internal\", \"attachment\": \"Q1_General_Report.pdf\"}",
+        "output.value": "{\"status\": \"sent\", \"message_id\": \"msg_9921\"}"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "0202b00000000006",
+      "parent_span_id": "0202b00000000001",
+      "name": "chat_model:confirm_sent",
+      "start_time": "2026-11-11T17:15:03.460Z",
+      "end_time": "2026-11-11T17:15:04.150Z",
+      "attributes": {
+        "openinference.span.kind": "LLM",
+        "llm.model_name": "gpt-4o",
+        "input.value": "[{\"role\": \"tool\", \"tool_call_id\": \"call_send_email\", \"content\": \"{\\\"status\\\": \\\"sent\\\", \\\"message_id\\\": \\\"msg_9921\\\"}\"}]",
+        "output.value": "I have emailed Q1_General_Report.pdf to Marcus."
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "0202b00000000007",
+      "parent_span_id": null,
+      "name": "AgentRun:Turn2",
+      "start_time": "2026-11-11T17:15:30.000Z",
+      "end_time": "2026-11-11T17:15:34.900Z",
+      "attributes": {
+        "openinference.span.kind": "CHAIN",
+        "input.value": "{\"user_message\": \"No! Not Q1. I meant yesterday's incident report for the staging database outage.\"}",
+        "output.value": "{\"assistant_message\": \"I apologize for the mistake! I located yesterday's incident report, staging_outage_nov10.pdf, and have sent it to Marcus immediately.\"}"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "0202b00000000008",
+      "parent_span_id": "0202b00000000007",
+      "name": "chat_model:parse_correction",
+      "start_time": "2026-11-11T17:15:30.050Z",
+      "end_time": "2026-11-11T17:15:31.250Z",
+      "attributes": {
+        "openinference.span.kind": "LLM",
+        "llm.model_name": "gpt-4o",
+        "input.value": "[{\"role\": \"user\", \"content\": \"No! Not Q1. I meant yesterday's incident report for the staging database outage.\"}]",
+        "output.value": "{\"tool_calls\": [{\"name\": \"search_files\", \"arguments\": \"{\\\"query\\\": \\\"staging_database_outage_incident\\\"}\"}]}"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "0202b00000000009",
+      "parent_span_id": "0202b00000000007",
+      "name": "execute_tool:search_files",
+      "start_time": "2026-11-11T17:15:31.260Z",
+      "end_time": "2026-11-11T17:15:31.850Z",
+      "attributes": {
+        "openinference.span.kind": "TOOL",
+        "tool.name": "search_files",
+        "tool.parameters": "{\"query\": \"staging_database_outage_incident\"}",
+        "tool.output": "[{\"name\": \"staging_outage_nov10.pdf\", \"id\": \"doc_nov10_inc\"}]",
+        "input.value": "{\"query\": \"staging_database_outage_incident\"}",
+        "output.value": "[{\"name\": \"staging_outage_nov10.pdf\", \"id\": \"doc_nov10_inc\"}]"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "0202b00000000010",
+      "parent_span_id": "0202b00000000007",
+      "name": "chat_model:resend_correct_doc",
+      "start_time": "2026-11-11T17:15:31.860Z",
+      "end_time": "2026-11-11T17:15:32.900Z",
+      "attributes": {
+        "openinference.span.kind": "LLM",
+        "llm.model_name": "gpt-4o",
+        "input.value": "[{\"role\": \"tool\", \"tool_call_id\": \"call_search_incident\", \"content\": \"[{\\\"name\\\": \\\"staging_outage_nov10.pdf\\\"}]\"}]",
+        "output.value": "{\"tool_calls\": [{\"name\": \"send_email\", \"arguments\": \"{\\\"recipient\\\": \\\"marcus@company.internal\\\", \\\"attachment\\\": \\\"staging_outage_nov10.pdf\\\"}\"}]}"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "0202b00000000011",
+      "parent_span_id": "0202b00000000007",
+      "name": "execute_tool:send_email",
+      "start_time": "2026-11-11T17:15:32.910Z",
+      "end_time": "2026-11-11T17:15:33.550Z",
+      "attributes": {
+        "openinference.span.kind": "TOOL",
+        "tool.name": "send_email",
+        "tool.parameters": "{\"recipient\": \"marcus@company.internal\", \"attachment\": \"staging_outage_nov10.pdf\"}",
+        "tool.output": "{\"status\": \"sent\", \"message_id\": \"msg_9945\"}",
+        "input.value": "{\"recipient\": \"marcus@company.internal\", \"attachment\": \"staging_outage_nov10.pdf\"}",
+        "output.value": "{\"status\": \"sent\", \"message_id\": \"msg_9945\"}"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "0202b00000000012",
+      "parent_span_id": "0202b00000000007",
+      "name": "chat_model:apologize_and_confirm",
+      "start_time": "2026-11-11T17:15:33.560Z",
+      "end_time": "2026-11-11T17:15:34.850Z",
+      "attributes": {
+        "openinference.span.kind": "LLM",
+        "llm.model_name": "gpt-4o",
+        "input.value": "[{\"role\": \"tool\", \"tool_call_id\": \"call_send_incident\", \"content\": \"{\\\"status\\\": \\\"sent\\\", \\\"message_id\\\": \\\"msg_9945\\\"}\"}]",
+        "output.value": "I apologize for the mistake! I located yesterday's incident report, staging_outage_nov10.pdf, and have sent it to Marcus immediately."
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "0202b00000000013",
+      "parent_span_id": null,
+      "name": "AgentRun:Turn3",
+      "start_time": "2026-11-11T17:16:00.000Z",
+      "end_time": "2026-11-11T17:16:01.300Z",
+      "attributes": {
+        "openinference.span.kind": "CHAIN",
+        "input.value": "{\"user_message\": \"Thanks, that's the one.\"}",
+        "output.value": "{\"assistant_message\": \"You're very welcome! Let me know if you need anything else forwarded.\"}"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "0202b00000000014",
+      "parent_span_id": "0202b00000000013",
+      "name": "chat_model:closing",
+      "start_time": "2026-11-11T17:16:00.050Z",
+      "end_time": "2026-11-11T17:16:01.250Z",
+      "attributes": {
+        "openinference.span.kind": "LLM",
+        "llm.model_name": "gpt-4o",
+        "input.value": "[{\"role\": \"user\", \"content\": \"Thanks, that's the one.\"}]",
+        "output.value": "You're very welcome! Let me know if you need anything else forwarded."
+      },
+      "status": {
+        "code": "OK"
+      }
+    }
+  ]
+}

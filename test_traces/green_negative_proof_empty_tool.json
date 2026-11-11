@@ -1,0 +1,120 @@
+{
+  "trace_id": "d2e3f4a5b6c708193a4b5c6d7e8f0202",
+  "session_id": "sess_negative_proof_491",
+  "spans": [
+    {
+      "span_id": "f202000000000001",
+      "parent_span_id": null,
+      "name": "AgentRun:Turn1",
+      "start_time": "2026-11-11T16:10:00.000Z",
+      "end_time": "2026-11-11T16:10:03.800Z",
+      "attributes": {
+        "openinference.span.kind": "CHAIN",
+        "input.value": "{\"user_message\": \"Check if customer user_491 has any unpaid invoices or account flags.\"}",
+        "output.value": "{\"assistant_message\": \"Account user_491 is in good standing with 0 unpaid invoices and no account flags.\"}"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "f202000000000002",
+      "parent_span_id": "f202000000000001",
+      "name": "chat_model:plan_checks",
+      "start_time": "2026-11-11T16:10:00.050Z",
+      "end_time": "2026-11-11T16:10:01.200Z",
+      "attributes": {
+        "openinference.span.kind": "LLM",
+        "llm.model_name": "gpt-4o",
+        "input.value": "[{\"role\": \"system\", \"content\": \"You are an account management assistant.\"}, {\"role\": \"user\", \"content\": \"Check if customer user_491 has any unpaid invoices or account flags.\"}]",
+        "output.value": "{\"tool_calls\": [{\"name\": \"get_unpaid_invoices\", \"arguments\": \"{\\\"user_id\\\": \\\"user_491\\\"}\"}, {\"name\": \"get_account_flags\", \"arguments\": \"{\\\"user_id\\\": \\\"user_491\\\"}\"}]}"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "f202000000000003",
+      "parent_span_id": "f202000000000001",
+      "name": "execute_tool:get_unpaid_invoices",
+      "start_time": "2026-11-11T16:10:01.210Z",
+      "end_time": "2026-11-11T16:10:01.800Z",
+      "attributes": {
+        "openinference.span.kind": "TOOL",
+        "tool.name": "get_unpaid_invoices",
+        "tool.parameters": "{\"user_id\": \"user_491\"}",
+        "tool.output": "[]",
+        "input.value": "{\"user_id\": \"user_491\"}",
+        "output.value": "[]"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "f202000000000004",
+      "parent_span_id": "f202000000000001",
+      "name": "execute_tool:get_account_flags",
+      "start_time": "2026-11-11T16:10:01.810Z",
+      "end_time": "2026-11-11T16:10:02.350Z",
+      "attributes": {
+        "openinference.span.kind": "TOOL",
+        "tool.name": "get_account_flags",
+        "tool.parameters": "{\"user_id\": \"user_491\"}",
+        "tool.output": "[]",
+        "input.value": "{\"user_id\": \"user_491\"}",
+        "output.value": "[]"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "f202000000000005",
+      "parent_span_id": "f202000000000001",
+      "name": "chat_model:synthesize_status",
+      "start_time": "2026-11-11T16:10:02.360Z",
+      "end_time": "2026-11-11T16:10:03.750Z",
+      "attributes": {
+        "openinference.span.kind": "LLM",
+        "llm.model_name": "gpt-4o",
+        "input.value": "[{\"role\": \"tool\", \"tool_call_id\": \"call_invoices\", \"content\": \"[]\"}, {\"role\": \"tool\", \"tool_call_id\": \"call_flags\", \"content\": \"[]\"}]",
+        "output.value": "Account user_491 is in good standing with 0 unpaid invoices and no account flags."
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "f202000000000006",
+      "parent_span_id": null,
+      "name": "AgentRun:Turn2",
+      "start_time": "2026-11-11T16:10:30.000Z",
+      "end_time": "2026-11-11T16:10:31.200Z",
+      "attributes": {
+        "openinference.span.kind": "CHAIN",
+        "input.value": "{\"user_message\": \"Awesome, thank you!\"}",
+        "output.value": "{\"assistant_message\": \"You're very welcome! Let me know if you need help with anything else.\"}"
+      },
+      "status": {
+        "code": "OK"
+      }
+    },
+    {
+      "span_id": "f202000000000007",
+      "parent_span_id": "f202000000000006",
+      "name": "chat_model:acknowledge",
+      "start_time": "2026-11-11T16:10:30.050Z",
+      "end_time": "2026-11-11T16:10:31.150Z",
+      "attributes": {
+        "openinference.span.kind": "LLM",
+        "llm.model_name": "gpt-4o",
+        "input.value": "[{\"role\": \"user\", \"content\": \"Awesome, thank you!\"}]",
+        "output.value": "You're very welcome! Let me know if you need help with anything else."
+      },
+      "status": {
+        "code": "OK"
+      }
+    }
+  ]
+}
