@@ -32,18 +32,21 @@ Friction score is a measure of the user's experience using your agent. It is a p
         + `Repetition` (User having to repeat themselves)
         + `Satisfaction` (User is satisfied)
     `Calculated Friction += (Frustration * MAX_FRUSTRATION) + (Repetition * MAX_REPETION) - (Satisfaction * MAX_SATISFACTION)`
-    `Max Friction += MAX_FRUSTRATION + MAX_REPETITION - MAX_SATISFACTION`
+    `Max Friction += MAX_FRUSTRATION + MAX_REPETITION + MAX_SATISFACTION`
     - If `New prompt length` drops but huge sign of positive keywords
     e.g. 'Exactly', Nice, Weldone, Continue, Thanks, Looks good, Yes, e.t.c. (can be made more exhaustive over time)
     `Max Friction += Number of matches`
 
     - Huge rise in `New prompt length` (the user is likely reexplaining). 
     `(New prompt length / Average prompt length of previous N messages) >> 1`
-    Immediately trigger LITE to analyze and grade on the `FRS` scale.
+    Trigger LITE to analyze and grade on the `FRS` scale.
 
 6. At the end. Fetch the journal of all the observations and run it through an LLM to generate a summary of the observations and suggested improvements.
 
 END
+
+
+LITE is a decision model (e.g. Jev), it is not triggered mid-processing. It is triggered at the end so observations that need intelligent judgement can be batched and send off.
 
 ## Future Improvements
 
