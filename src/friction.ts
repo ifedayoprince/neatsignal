@@ -1,5 +1,5 @@
 import { length } from "zod";
-import { EMPTY_RESP_THRESHOLD, MAX_TOOL_LOOP_DOOM, NAIVE_SIM_THRESHOLD, NEGATIVE_SIGNALS, PENALTY_TOOL_EMPTY_RESP, POSITIVE_SIGNALS, SUSPICIOUSLY_SHORT_PROMPT, TOOL_CONSEC_THRESHOLD, TOOL_WINDOW_SIZE } from "./constants.js";
+import { EMPTY_RESP_THRESHOLD, MAX_TOOL_LOOP_DOOM, NAIVE_SIM_THRESHOLD, NEGATIVE_SIGNALS, PENALTY_TOOL_EMPTY_RESP, POSITIVE_SIGNALS, PREV_PROMPT_WINDOW, SUSPICIOUSLY_SHORT_PROMPT, TOOL_CONSEC_THRESHOLD, TOOL_WINDOW_SIZE } from "./constants.js";
 import type { JournalEntry } from "./friction.type.js";
 import type { MessageEntry, ToolCall } from "./trace.type.js";
 import { checkToolArgsSimilarity, countMatches, countWords, isEmptyToolCall, percent } from "./utils.js";
@@ -29,54 +29,62 @@ export class FrictionMonitor {
       this.handleToolCall(message!, i);
 
       // Heuristic 3. Flag sudden reduction in user prompt length.
-      if (message?.role == "user" && message.content
-        && countWords(message.content) <= SUSPICIOUSLY_SHORT_PROMPT) {
-        const averageLength = this.userPromptCache.reduce((acc, p) => acc + countWords(p), 0) / this.userPromptCache.length;
+      this.handleUserPromptReduction(message!, i);
 
-        // 3.1 - Average prompt length is usually longer
-        const currentLength = countWords(message.content);
-        const factor = averageLength / currentLength;
-        if (factor > 2) {
-          const delta = 10;
-          this.addJournal({
-            msgIdx: i,
-            calculatedDelta: factor * delta,
-            maxDelta: delta,
-            includeContent: true,
-            note: `\nUser prompts are usually ${percent(factor)} longer than current prompt length. Current length ${currentLength} words.`
-          });
-        }
-
-        // 3.2 - Count negative keyword triggers
-        const negativeTriggers = countMatches(message.content, NEGATIVE_SIGNALS);
-        if (negativeTriggers.length > 1) {
-          const deltaPerTrigger = 2;
-          this.addJournal({
-            msgIdx: i,
-            includeContent: true,
-            calculatedDelta: deltaPerTrigger * negativeTriggers.length,
-            maxDelta: deltaPerTrigger * negativeTriggers.length,
-            note: `User prompt has ${negativeTriggers.length} negative trigger matches. (Matches: ${negativeTriggers.join(', ')})`
-          });
-        }
-
-        // 3.3 - Count positive keyword triggers/ 
-        // Increase maxDelta without increasing calculatedDelta to bring down the overall friction score.
-        const positiveTriggers = countMatches(message.content, POSITIVE_SIGNALS);
-        if (positiveTriggers.length > 1) {
-          const deltaPerTrigger = 3;
-          this.addJournal({
-            msgIdx: i,
-            calculatedDelta: 0,
-            includeContent: true,
-            maxDelta: deltaPerTrigger * positiveTriggers.length,
-            note: `User prompt has ${positiveTriggers.length} positive trigger matches. (Matches: ${positiveTriggers.join(', ')})`
-          });
-        }
-      }
+      // Heuristic 4. Flag sudden rise in user prompt length.
+       
     }
   }
 
+  handleUserPromptReduction(message: MessageEntry, idx: number) {
+    if (message?.role != "user" || !message.content
+      || countWords(message.content) > SUSPICIOUSLY_SHORT_PROMPT) return;
+
+    const averageLength = this.userPromptCache.reduce((acc, p) => acc + countWords(p), 0) / this.userPromptCache.length;
+
+    // 3.1 - Average prompt length is usually longer
+    const currentLength = countWords(message.content);
+    const factor = averageLength / currentLength;
+    if (factor > 2) {
+      const delta = 10;
+      this.addJournal({
+        msgIdx: idx,
+        calculatedDelta: factor * delta,
+        maxDelta: delta,
+        includeContent: true,
+        note: `\nUser prompts are usually ${percent(factor)} longer than current prompt length. Current length ${currentLength} words.`
+      });
+    }
+
+    // 3.2 - Count negative keyword triggers
+    const negativeTriggers = countMatches(message.content, NEGATIVE_SIGNALS);
+    if (negativeTriggers.length > 1) {
+      const deltaPerTrigger = 2;
+      this.addJournal({
+        msgIdx: idx,
+        includeContent: true,
+        calculatedDelta: deltaPerTrigger * negativeTriggers.length,
+        maxDelta: deltaPerTrigger * negativeTriggers.length,
+        note: `User prompt has ${negativeTriggers.length} negative trigger matches. (Matches: ${negativeTriggers.join(', ')})`
+      });
+    }
+
+    // 3.3 - Count positive keyword triggers/ 
+    // Increase maxDelta without increasing calculatedDelta to bring down the overall friction score.
+    const positiveTriggers = countMatches(message.content, POSITIVE_SIGNALS);
+    if (positiveTriggers.length > 1) {
+      const deltaPerTrigger = 3;
+      this.addJournal({
+        msgIdx: idx,
+        calculatedDelta: 0,
+        includeContent: true,
+        maxDelta: deltaPerTrigger * positiveTriggers.length,
+        note: `User prompt has ${positiveTriggers.length} positive trigger matches. (Matches: ${positiveTriggers.join(', ')})`
+      });
+    }
+
+    this.cacheUserPrompt(message.content);
+  }
   handleToolCall(message: MessageEntry, idx: number) {
     if (message?.role != "tool" || !message.tool_call) return;
 
@@ -136,6 +144,11 @@ ${entry.calls.map((call, idx) => `Call ${idx} has args ${JSON.stringify(call?.pa
     }
   }
 
+  cacheUserPrompt(prompt: string) {
+    this.userPromptCache = [...this.userPromptCache, prompt];
+    if (this.userPromptCache.length > PREV_PROMPT_WINDOW)
+      this.userPromptCache = this.userPromptCache.slice(-1 * PREV_PROMPT_WINDOW);
+  }
   addJournal(entry: JournalEntry) {
     this.journal.push(entry);
     this.maxFriction += entry.maxDelta;
