@@ -9,6 +9,7 @@ import { error } from './utils.js';
 import { normalizeOtel } from './otel.js';
 import { TOOL_WINDOW_SIZE } from './constants.js';
 import { FrictionMonitor } from './friction.js';
+import figlet from 'figlet';
 
 const cli = cac('Neatsignal');
 cli
@@ -33,6 +34,8 @@ cli
 
     if (!content) return;
 
+    console.log(picocolors.green(await figlet("Neatsignal")))
+    console.log(`           Trace analyzer built by Ifedayo\n\n`)
     console.log(boxen(
       `
 ${picocolors.green('Trace File:')} ${picocolors.gray(traceFile)}
@@ -41,8 +44,7 @@ ${picocolors.green('Session ID:')} ${content?.session_id ?? "No Session"}
 ${picocolors.green('Total Spans:')} ${content?.spans?.length?.toLocaleString()} (s)
 `.trim(),
       {
-        title: 'Neatsignal',
-        titleAlignment: 'center',
+        title: "Input Trace",
         padding: 1
       })
     );
