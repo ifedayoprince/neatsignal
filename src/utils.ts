@@ -1,6 +1,6 @@
 import picocolors from "picocolors";
+import levenshtein from "fast-levenshtein";
 import type { ToolCall } from "./trace.type.js";
-import { match } from "node:assert";
 
 export function error(message: string, exit: boolean = true) {
   console.error(picocolors.red('[ERROR]: ' + message));
@@ -14,11 +14,6 @@ export function warn(message: string) {
 export function isEmptyToolCall(call: ToolCall) {
   return call?.output?.length == 0
     || Object.keys(call?.output ?? {}).length == 0;
-}
-
-export function checkToolArgsSimilarity(calls: ToolCall[]) {
-  // To be implemented
-  return 1;
 }
 
 export function countWords(str: string) {
@@ -37,4 +32,28 @@ export function countMatches(str: string, refList: string[]) {
   });
 
   return matches;
+}
+
+
+
+export function normalizedSimilarity(a: string, b: string): number {
+  if (a === b) return 1.0;
+  const maxLength = Math.max(a.length, b.length);
+  if (maxLength === 0) return 1.0;
+
+  const distance = levenshtein.get(a, b);
+  return Math.max(0.0, 1.0 - distance / maxLength);
+}
+
+export function checkToolArgsSimilarity(calls: ToolCall[]) {
+  const args = calls.map(call => JSON.stringify(call.params));
+
+  const uniquePairs = [];
+  for (let i = 0; i < args.length; i++) {
+    for (let j = i + 1; j < args.length; j++) {
+      const sim = normalizedSimilarity(args[i]!, args[j]!);
+      uniquePairs.push(sim);
+    }
+  }
+  return uniquePairs.reduce((acc, pair) => acc + pair, 0) / uniquePairs.length;
 }

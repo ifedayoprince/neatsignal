@@ -32,8 +32,54 @@ export class FrictionMonitor {
       this.handleUserPromptReduction(message!, i);
 
       // Heuristic 4. Flag sudden rise in user prompt length.
-       
+      this.handleUserPromptGrowth(message!, i);
     }
+  }
+
+  handleUserPromptGrowth(message: MessageEntry, idx: number) {
+    if (message?.role != "user" || !message.content
+      || countWords(message.content) <= SUSPICIOUSLY_SHORT_PROMPT) return;
+
+    const averageLength = this.userPromptCache.reduce((acc, p) => acc + countWords(p), 0) / this.userPromptCache.length;
+
+    // User is writing long message. Likely reexplaining themselves.
+    const currentLength = countWords(message.content);
+    const factor = currentLength / averageLength;
+    const delta = factor * 5;
+    const entry: JournalEntry = {
+      msgIdx: idx,
+      calculatedDelta: factor * delta,
+      maxDelta: delta,
+      includeContent: true,
+      note: `User prompt is ${percent(factor)} longer than before. `
+    }
+
+    // 4.1 - Long re-explanation or rant
+    if (factor > 4) {
+      entry.note += `They are likely re-explaining themselves. Current length ${currentLength} words.`;
+    }
+    // 4.2 - Providing clarity to the agent or giving follow-up
+    else if (factor > 2) {
+      entry.note += `They are likely querying the agent, clarifying or giving follow-up. Current length ${currentLength} words.`;
+    }
+
+    if (factor > 1) this.addJournal(entry);
+
+    // 4.3 - Count positive keyword triggers
+    // Increase maxDelta without increasing calculatedDelta to bring down the overall friction score.
+    const positiveTriggers = countMatches(message.content, POSITIVE_SIGNALS);
+    if (positiveTriggers.length > 1) {
+      const deltaPerTrigger = 3;
+      this.addJournal({
+        msgIdx: idx,
+        calculatedDelta: 0,
+        includeContent: true,
+        maxDelta: deltaPerTrigger * positiveTriggers.length,
+        note: `User prompt has ${positiveTriggers.length} positive trigger matches. (Matches: ${positiveTriggers.join(', ')})`
+      });
+    }
+
+    this.cacheUserPrompt(message.content);
   }
 
   handleUserPromptReduction(message: MessageEntry, idx: number) {
@@ -149,8 +195,9 @@ ${entry.calls.map((call, idx) => `Call ${idx} has args ${JSON.stringify(call?.pa
     if (this.userPromptCache.length > PREV_PROMPT_WINDOW)
       this.userPromptCache = this.userPromptCache.slice(-1 * PREV_PROMPT_WINDOW);
   }
+  
   addJournal(entry: JournalEntry) {
-    this.journal.push(entry);
+    this.journal.push({ ...entry, note: entry.note.trim() });
     this.maxFriction += entry.maxDelta;
     this.calculatedFriction += entry.calculatedDelta;
   }
