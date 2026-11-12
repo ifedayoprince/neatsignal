@@ -49,7 +49,7 @@ ${picocolors.green('Total Spans:')} ${content?.spans?.length?.toLocaleString()} 
 
     let messages: MessageEntry[] = normalizeOtel(content);
     const monitor = new FrictionMonitor(messages);
-    monitor.scan();
+    await monitor.scan();
   });
 
 cli.help();

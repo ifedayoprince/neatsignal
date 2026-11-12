@@ -5,3 +5,12 @@ export interface JournalEntry {
     maxDelta: number;
     note: string;
 }
+
+export interface Score {
+    totalObservations: number;
+    validObservations: number;
+    calculatedFriction: number;
+    maxFriction: number;
+    frictionScore: number;
+    recommendations?: string;
+}
