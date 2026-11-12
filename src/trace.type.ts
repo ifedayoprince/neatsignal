@@ -44,7 +44,3 @@ export interface RawTraceFile {
     session_id?: string;
     spans: RawOtelSpan[];
 }
-
-export interface ToolMapEntry {
-    lastCa
-}

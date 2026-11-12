@@ -1,4 +1,4 @@
-import type { MessageEntry, RawTraceFile } from "./types.js";
+import type { MessageEntry, RawTraceFile } from "./trace.type.js";
 import { warn } from "./utils.js";
 
 export function normalizeOtel(content: RawTraceFile) {

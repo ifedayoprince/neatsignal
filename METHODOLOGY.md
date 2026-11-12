@@ -55,6 +55,7 @@ LITE is a decision model (e.g. Jev), it is not triggered mid-processing. It is t
 3. Values for `SUSPICOUSLY_SHORT_PROMPT` and the `MAX_...` fields can be tuned as more real-world data and behaviour is revealed.
 4. Support direct/real-time ingestion for proactive notification of clients
 5. Improve heuristics to futher reduce calls the LITE model.
+6. For larger traces, we could split the trace and walkthrough random chunks of it in parallel.
 
 Written by Ifedayo
 11/11/2026

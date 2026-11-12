@@ -4,9 +4,11 @@ import { existsSync } from 'fs';
 import { readFile } from 'fs/promises';
 import path from 'path';
 import picocolors from 'picocolors';
-import type { MessageEntry, RawTraceFile } from './types.js';
+import type { MessageEntry, RawTraceFile } from './trace.type.js';
 import { error } from './utils.js';
 import { normalizeOtel } from './otel.js';
+import { TOOL_WINDOW_SIZE } from './constants.js';
+import { FrictionMonitor } from './friction.js';
 
 const cli = cac('Neatsignal');
 cli
@@ -28,7 +30,7 @@ cli
     } catch {
       error("Could not parse trace file. Please ensure JSON is valid.");
     }
-    
+
     if (!content) return;
 
     console.log(boxen(
@@ -46,12 +48,8 @@ ${picocolors.green('Total Spans:')} ${content?.spans?.length?.toLocaleString()} 
     );
 
     let messages: MessageEntry[] = normalizeOtel(content);
-   
-    const userPrompts: string[] = [];
-    const toolMap = new Map<string, ToolMapEntry>();
-    for (const message of messages) {
-
-    }
+    const monitor = new FrictionMonitor(messages);
+    monitor.scan();
   });
 
 cli.help();
