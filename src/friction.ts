@@ -36,11 +36,12 @@ export class FrictionMonitor {
       this.handleCapabilityMismatch(message!, i);
     }
 
-    const score = await this.score();
-    await this.present(score);
+    const validated = await this.validateJournal();
+    const score = await this.score(validated);
+    await this.present(score, validated);
   }
 
-  async present(score: Score) {
+  async present(score: Score, validated: JournalEntry[]) {
     const color = (str: string) => {
       if (score.frictionScore > 0.75) return picocolors.red(str);
       if (score.frictionScore > 0.5) return picocolors.magenta(str);
@@ -72,7 +73,14 @@ export class FrictionMonitor {
 
     console.log(`==========================================`)
     console.log(`${picocolors.green('Scan complete!')}`)
-    console.log(`${picocolors.green('Summary:')}`)
+
+    console.log(`\n-- ${picocolors.green('Journal:')} --`)
+    validated.forEach(entry => {
+      console.log(`• Message ${entry.msgIdx}: ${entry.note}.`);
+    });
+    
+
+    console.log(`\n-- ${picocolors.green('Summary:')} --`)
     console.log(` Total observations: ${score.totalObservations.toLocaleString()} (${score.validObservations.toLocaleString()} verified)`);
     console.log(` Calculated friction: ${score.calculatedFriction.toLocaleString()} (max: ${score.maxFriction.toLocaleString()})`);
     console.log(` Overall friction score:\n\n`);
@@ -84,9 +92,7 @@ export class FrictionMonitor {
     console.log(`==========================================`)
 
   }
-  async score(): Promise<Score> {
-    const validated = await this.validateJournal();
-
+  async score(validated: JournalEntry[]): Promise<Score> {
     const calculatedFriction = validated.reduce((acc, e) => acc + e.calculatedDelta, 0);
     const maxFriction = validated.reduce((acc, e) => acc + e.maxDelta, 0);
 
