@@ -1,5 +1,5 @@
 import figlet from "figlet";
-import { EMPTY_RESP_THRESHOLD, MAX_TOOL_LOOP_DOOM, NAIVE_SIM_THRESHOLD, NEGATIVE_SIGNALS, PENALTY_TOOL_EMPTY_RESP, POSITIVE_SIGNALS, PREV_PROMPT_WINDOW, SPIKE_RATIO_THRESHOLD, SUSPICIOUSLY_SHORT_PROMPT, TOOL_CONSEC_THRESHOLD, TOOL_WINDOW_SIZE } from "./constants.js";
+import { EMPTY_RESP_THRESHOLD, MAX_TOOL_LOOP_DOOM, MIN_TOOL_CALLS_FOR_EMPTY, NAIVE_SIM_THRESHOLD, NEGATIVE_SIGNALS, PENALTY_CAPABILITY_MISMATCH, PENALTY_TOOL_EMPTY_RESP, POSITIVE_SIGNALS, PREV_PROMPT_WINDOW, SPIKE_RATIO_THRESHOLD, SUSPICIOUSLY_SHORT_PROMPT, TOOL_CONSEC_THRESHOLD, TOOL_WINDOW_SIZE } from "./constants.js";
 import type { JournalEntry, Score } from "./friction.type.js";
 import type { MessageEntry, ToolCall } from "./trace.type.js";
 import { checkToolArgsSimilarity, countMatches, countWords, error, isEmptyToolCall, percent, warn } from "./utils.js";
@@ -31,6 +31,9 @@ export class FrictionMonitor {
 
       // Heuristic 4. Flag sudden rise in user prompt length.
       this.handleUserPromptGrowth(message!, i);
+
+      // Heuristic 5. Flag capability failures / unsupported actions.
+      this.handleCapabilityMismatch(message!, i);
     }
 
     const score = await this.score();
@@ -216,7 +219,10 @@ export class FrictionMonitor {
       // 3.1 - Average prompt length is usually longer
       const currentLength = countWords(message.content);
       const factor = currentLength > 0 ? averageLength / currentLength : 0;
-      if (factor > 2) {
+      const positiveTriggers = countMatches(message.content, POSITIVE_SIGNALS);
+      const negativeTriggers = countMatches(message.content, NEGATIVE_SIGNALS);
+
+      if (factor > 2 && positiveTriggers.length === 0) {
         const delta = 10;
         this.addJournal({
           msgIdx: idx,
@@ -228,7 +234,6 @@ export class FrictionMonitor {
       }
 
       // 3.2 - Count negative keyword triggers
-      const negativeTriggers = countMatches(message.content, NEGATIVE_SIGNALS);
       if (negativeTriggers.length > 0) {
         const deltaPerTrigger = 2;
         this.addJournal({
@@ -242,7 +247,6 @@ export class FrictionMonitor {
 
       // 3.3 - Count positive keyword triggers
       // Increase maxDelta without increasing calculatedDelta to bring down the overall friction score.
-      const positiveTriggers = countMatches(message.content, POSITIVE_SIGNALS);
       if (positiveTriggers.length > 0) {
         const deltaPerTrigger = 3;
         this.addJournal({
@@ -299,19 +303,45 @@ Confirm Yes or No
     }
 
     // Heuristic 2. Flag tools returning empty responses.
-    const emptyOutputCalls = entry.calls.filter(call => isEmptyToolCall(call!));
-    const emptyThreshold = emptyOutputCalls.length / entry.calls.length;
-    if (emptyThreshold > EMPTY_RESP_THRESHOLD) {
-      this.addJournal({
-        msgIdx: idx,
-        calculatedDelta: emptyThreshold * PENALTY_TOOL_EMPTY_RESP,
-        maxDelta: PENALTY_TOOL_EMPTY_RESP,
-        note: `
+    if (entry.calls.length >= MIN_TOOL_CALLS_FOR_EMPTY) {
+      const emptyOutputCalls = entry.calls.filter(call => isEmptyToolCall(call!));
+      const emptyThreshold = emptyOutputCalls.length / entry.calls.length;
+      if (emptyThreshold > EMPTY_RESP_THRESHOLD) {
+        this.addJournal({
+          msgIdx: idx,
+          calculatedDelta: emptyThreshold * PENALTY_TOOL_EMPTY_RESP,
+          maxDelta: PENALTY_TOOL_EMPTY_RESP,
+          note: `
 Tool ${message.tool_call.name} has repeated tool calls with empty responses (~${(emptyThreshold * 100).toFixed(2)}%)
 ${entry.calls.map((call, idx) => `Call ${idx} has args ${JSON.stringify(call?.params)}`).join('\n')}
 
 Confirm Yes or No
 `.trim()
+        });
+      }
+    }
+  }
+
+  handleCapabilityMismatch(message: MessageEntry, idx: number) {
+    if (message?.role != "tool" || !message.tool_call) return;
+    const output = message.tool_call.output;
+    if (!output || typeof output !== "object") return;
+
+    const isUnsupported =
+      output.refund_supported === false ||
+      output.supported === false ||
+      output.success === false ||
+      output.status === "failed" ||
+      output.status === "unsupported" ||
+      output.status === "error";
+
+    if (isUnsupported) {
+      this.addJournal({
+        msgIdx: idx,
+        calculatedDelta: PENALTY_CAPABILITY_MISMATCH,
+        maxDelta: PENALTY_CAPABILITY_MISMATCH,
+        includeContent: true,
+        note: `The tool '${message.tool_call.name}' output explicitly indicates that refunds or requested operations are unsupported or failed (refund_supported: false or failure status).`
       });
     }
   }
