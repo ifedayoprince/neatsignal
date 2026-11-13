@@ -3,6 +3,9 @@
 
 > Friction detection, triage, and eval mining for LLM agent traces.
 
+<img src="./demo.gif" alt="Demo" width="900" />
+
+
 Agent reliability isn't a dev-only problem. It’s a shared context problem. 
 
 Production agents generate huge volumes of traces. These runs are too important to ignore, but auditing them by hand doesn't scale, and running a full LLM eval on every span costs too much. Most agent failures don't throw 500 errors. The agent just silently ignores a constraint, loops on a tool, or frustrates the user while the span reports `200 OK`.
